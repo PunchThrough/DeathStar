@@ -1,10 +1,7 @@
 /*
-  DeathStar plush toy
-   
-  This sketch is intended to be used with the
-  LightBlue Bean
-  
-  NOTE: This sketch is not a low-power sketch.
+  This sketch programs a LightBlue Bean to play the Imperial March and turn on an LED when moved
+     
+  NOTE: This is not a low-power sketch.
    
   This example code is in the public domain.
 */ 
@@ -30,12 +27,14 @@ const int gH = 784;
 const int gSH = 830;
 const int aH = 880;
 
-//The pin that the buzzer is soldered to
 const int buzzerPin = 0;
-
-int counter = 0;
+const int ledPin = 5;
 
 const int amountOfTones=160;
+int counter = 0; //"counter" is used to keep track of where in the song we are
+
+#define accelerationThrehsold 150    // When acceleration change goes beyond this threshold, the LED will blink.
+AccelerationReading previousAccel;
 
 //An array of the song, beginning to end. It goes: tone, duration, tone, duration...
 int tones[amountOfTones] ={a, 500, a, 500, a, 500, f, 350, cH, 150, a, 500, f, 350, cH, 150, a, 650, 0, 500, eH, 500, eH, 500, eH, 500, fH, 350, cH, 150, gS, 500, f, 350, cH, 150, a, 650, 0, 500, 
@@ -46,39 +45,37 @@ f, 250, gS, 500, f, 375, cH, 125, a, 500, f, 375, cH, 125, a, 650, 0, 650};
 
 void setup()
 {
-  //Setup the buzzer
   pinMode(buzzerPin, OUTPUT);
-
-  // initialize serial communication at 57600 bits per second:
-  Serial.begin(57600);
+  pinMode(ledPin, OUTPUT);
+  previousAccel = Bean.getAcceleration(); // Initial acceleration reading
 }
  
 void loop()
 {
-  //Read the acceleration from the Beans accelerometer
-  AccelerationReading accel = {0, 0, 0};
-  accel = Bean.getAcceleration();
+  AccelerationReading currentAccel = Bean.getAcceleration();   // Get the current acceleration with a conversion of 3.91×10-3 g/unit.
   
-  int totalAccel=abs(accel.yAxis)+abs(accel.xAxis)+abs(accel.zAxis);
-
-  //The acceleration reads to ~300 when it's laying still due to gravity. To prevent it from always playing we set the limit to 400
-  if(totalAccel>400){
-    //tones[counter] = the tone that needs to be played
-    //tones[counter+1] = the duration
-    beep(tones[counter],tones[counter+1]);
-
+  int accelDifference = getAccelDifference(previousAccel, currentAccel);   // Find the difference between the current acceleration and that of 200ms ago.
+  previousAccel = currentAccel;                                            // Update previousAccel for the next loop. 
+   
+  if(accelDifference > accelerationThrehsold){   // Check if the Death Star has been moved beyond our threshold
+    digitalWrite(ledPin, HIGH); //Turn on the LED
+    
+    beep(tones[counter],tones[counter+1]);  //tones[counter] = the tone that needs to be played and tones[counter+1] = the duration
+    
     if(counter>amountOfTones-3){
-      //Reset the counter when it has reached the end of the tones array
-      counter=0;
+      counter=0; //Reset the counter when it has reached the end of the tones array
     }
     else{
       counter+=2;
     }
-}
-
-  delay(25);
+  }
+  else{ // If the Death Star isn't moving, turn off the LED
+   digitalWrite(ledPin, LOW);
+  }
+  Bean.sleep(25);
 }
  
+//This function plays the tones on the piezo buzzer
 void beep(int note, int duration)
 {
   //If note==0 no tone should be played
@@ -86,11 +83,16 @@ void beep(int note, int duration)
     delay(duration);
   }
   else{
-    //Play tone on buzzerPin
-    tone(buzzerPin, note, duration);
+    tone(buzzerPin, note, duration); //Play tone on piezo buzzer
     delay(duration);
-  
-    //Stop tone on buzzerPin
-    noTone(buzzerPin);
+    noTone(buzzerPin); //Stop tone on buzzerPin
   }
+}
+
+// This function calculates the difference between two acceleration readings
+int getAccelDifference(AccelerationReading readingOne, AccelerationReading readingTwo){
+  int deltaX = abs(readingTwo.xAxis - readingOne.xAxis);
+  int deltaY = abs(readingTwo.yAxis - readingOne.yAxis);
+  int deltaZ = abs(readingTwo.zAxis - readingOne.zAxis);
+  return deltaX + deltaY + deltaZ;   // Return the magnitude
 }
