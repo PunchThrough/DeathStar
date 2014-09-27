@@ -7,33 +7,19 @@
 */ 
  
 //All the tones that we will use in the song 
-const int c = 261;
-const int d = 294;
-const int e = 329;
-const int f = 349;
-const int g = 391;
-const int gS = 415;
-const int a = 440;
-const int aS = 455;
-const int b = 466;
-const int cH = 523;
-const int cSH = 554;
-const int dH = 587;
-const int dSH = 622;
-const int eH = 659;
-const int fH = 698;
-const int fSH = 740;
-const int gH = 784;
-const int gSH = 830;
-const int aH = 880;
+const int c = 261, d = 294, e = 329, f = 349, g = 391, gS = 415,
+a = 440, aS = 455, b = 466, cH = 523, cSH = 554, dH = 587, dSH = 622, 
+eH = 659, fH = 698, fSH = 740, gH = 784, gSH = 830, aH = 880;
 
 const int buzzerPin = 0;
 const int ledPin = 5;
 
 const int amountOfTones=160;
-int counter = 0; //"counter" is used to keep track of where in the song we are
+//"counter" is used to keep track of where in the song we are
+int counter = 0; 
 
-#define accelerationThrehsold 150    // When acceleration change goes beyond this threshold, the LED will blink.
+// When acceleration change goes beyond this threshold, the LED will blink.
+#define accelerationThreshold 150    
 AccelerationReading previousAccel;
 
 //An array of the song, beginning to end. It goes: tone, duration, tone, duration...
@@ -47,32 +33,42 @@ void setup()
 {
   pinMode(buzzerPin, OUTPUT);
   pinMode(ledPin, OUTPUT);
-  previousAccel = Bean.getAcceleration(); // Initial acceleration reading
+  // Initial acceleration reading
+  previousAccel = Bean.getAcceleration(); 
 }
  
 void loop()
 {
-  AccelerationReading currentAccel = Bean.getAcceleration();   // Get the current acceleration with a conversion of 3.91×10-3 g/unit.
+  // Get the current acceleration with a conversion of 3.91×10-3 g/unit.
+  AccelerationReading currentAccel = Bean.getAcceleration();   
   
-  int accelDifference = getAccelDifference(previousAccel, currentAccel);   // Find the difference between the current acceleration and that of 200ms ago.
-  previousAccel = currentAccel;                                            // Update previousAccel for the next loop. 
-   
-  if(accelDifference > accelerationThrehsold){   // Check if the Death Star has been moved beyond our threshold
-    digitalWrite(ledPin, HIGH); //Turn on the LED
+  // Find the difference between the current acceleration and that of 200ms ago.
+  int accelDifference = getAccelDifference(previousAccel, currentAccel);  
+  // Update previousAccel for the next loop. 
+  previousAccel = currentAccel;   
+  
+  // Check if the Death Star has been moved beyond our threshold
+  if(accelDifference > accelerationThreshold){   
+    //Turn on the LED
+    digitalWrite(ledPin, HIGH); 
     
-    beep(tones[counter],tones[counter+1]);  //tones[counter] = the tone that needs to be played and tones[counter+1] = the duration
+    //tones[counter] = the tone that needs to be played and tones[counter+1] = the duration
+    beep(tones[counter],tones[counter+1]);  
     
     if(counter>amountOfTones-3){
-      counter=0; //Reset the counter when it has reached the end of the tones array
+      //Reset the counter when it has reached the end of the tones array
+      counter=0; 
     }
     else{
       counter+=2;
     }
-  }
-  else{ // If the Death Star isn't moving, turn off the LED
-   digitalWrite(ledPin, LOW);
-  }
   Bean.sleep(25);
+  }
+  else{ 
+   // If the Death Star isn't moving, turn off the LED
+   digitalWrite(ledPin, LOW);
+    Bean.sleep(200);
+  }
 }
  
 //This function plays the tones on the piezo buzzer
@@ -83,9 +79,11 @@ void beep(int note, int duration)
     delay(duration);
   }
   else{
-    tone(buzzerPin, note, duration); //Play tone on piezo buzzer
+    //Play tone on piezo buzzer
+    tone(buzzerPin, note, duration); 
     delay(duration);
-    noTone(buzzerPin); //Stop tone on buzzerPin
+    //Stop tone on buzzerPin
+    noTone(buzzerPin); 
   }
 }
 
@@ -94,5 +92,6 @@ int getAccelDifference(AccelerationReading readingOne, AccelerationReading readi
   int deltaX = abs(readingTwo.xAxis - readingOne.xAxis);
   int deltaY = abs(readingTwo.yAxis - readingOne.yAxis);
   int deltaZ = abs(readingTwo.zAxis - readingOne.zAxis);
-  return deltaX + deltaY + deltaZ;   // Return the magnitude
+  // Return the magnitude
+  return deltaX + deltaY + deltaZ;   
 }
