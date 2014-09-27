@@ -3,6 +3,6 @@ DeathStar
 
 Code for a plush Death Star that plays the Imperial March when you roll it. 
 
-<iframe src="//player.vimeo.com/video/107305371?title=0&amp;byline=0&amp;portrait=0&amp;color=ffffff" width="500" height="281" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+<img style="-webkit-user-select: none; cursor: zoom-in;" src="http://punchthrough.com/bean/wp-content/uploads/2014/09/deathstar12.jpg" width="531" height="353">
 
 <a href="http://punchthrough.com/bean/examples/bean-death-star-plush-toy/">Get the full tutorial</a>.
